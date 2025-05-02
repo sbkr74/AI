@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-data = pd.read_csv('AI\ML\data.csv')
+data = pd.read_csv('ML\data.csv')
 
 def loss_function(m,b,points):
     total_error = 0
