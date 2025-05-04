@@ -83,13 +83,6 @@ print(f"Gradient Descent Coefficients: slope={params['slope']:.2f}, intercept={p
 mse_gd = mean_squared_error(y, y_pred_gd)
 print(f"Mean Squared Error (Gradient Descent): {mse_gd:.2f}")
 
-# Plot loss convergence
-plt.figure(figsize=(10, 4))
-plt.plot(gd_lr.loss_history)
-plt.xlabel('Iteration')
-plt.ylabel('Mean Squared Error')
-plt.title('Gradient Descent Convergence')
-plt.show()
 
 # Plot results comparison
 plt.figure(figsize=(10, 6))
@@ -136,5 +129,66 @@ plt.plot(X, y_pred_gd_improved, color='purple', linestyle='-.', label='Improved 
 plt.xlabel('X')
 plt.ylabel('y')
 plt.title('Comparison of Gradient Descent Implementations')
+plt.legend()
+plt.show()
+
+class RidgeGradientDescent:
+    def __init__(self, learning_rate=0.01, n_iterations=1000, alpha=1.0):
+        self.learning_rate = learning_rate
+        self.n_iterations = n_iterations
+        self.alpha = alpha  # Regularization strength
+        self.theta = None
+        self.loss_history = []
+    
+    def fit(self, X, y):
+        X_b = np.c_[np.ones((len(X), 1)), X]
+        self.theta = np.random.randn(2, 1)
+        
+        for iteration in range(self.n_iterations):
+            gradients = 2/len(X) * X_b.T.dot(X_b.dot(self.theta) - y.reshape(-1, 1))
+            # Add regularization term (excluding intercept)
+            gradients[1:] += 2 * self.alpha * self.theta[1:] / len(X)
+            self.theta -= self.learning_rate * gradients
+            
+            # Calculate loss (MSE + regularization term)
+            mse = np.mean((X_b.dot(self.theta) - y.reshape(-1, 1))**2)
+            reg_term = self.alpha * np.sum(self.theta[1:]**2)
+            self.loss_history.append(mse + reg_term)
+    
+    def predict(self, X):
+        X_b = np.c_[np.ones((len(X), 1)), X]
+        return X_b.dot(self.theta)
+    
+    def get_params(self):
+        return {'intercept': self.theta[0][0], 'slope': self.theta[1][0]}
+
+# Initialize and fit ridge regression with gradient descent
+ridge_gd = RidgeGradientDescent(learning_rate=0.1, n_iterations=2000, alpha=5.0)
+ridge_gd.fit(X_normalized, y)
+
+# Get predictions
+y_pred_ridge = ridge_gd.predict(X_normalized)
+
+# Get parameters (adjusted for scaling)
+params_ridge = ridge_gd.get_params()
+ridge_intercept = params_ridge['intercept'] - params_ridge['slope'] * mean_X / std_X
+ridge_slope = params_ridge['slope'] / std_X
+
+print(f"Ridge Regression Coefficients: slope={ridge_slope:.2f}, intercept={ridge_intercept:.2f}")
+
+# Calculate MSE
+mse_ridge = mean_squared_error(y, y_pred_ridge)
+print(f"Mean Squared Error (Ridge Regression): {mse_ridge:.2f}")
+
+# Plot all results
+plt.figure(figsize=(10, 6))
+plt.scatter(X, y, label='Data', alpha=0.7)
+plt.plot(X, y_true, color='red', label='True relationship', linewidth=2)
+plt.plot(X, y_pred, color='green', label='OLS', linewidth=2)
+plt.plot(X, y_pred_gd_improved, color='blue', linestyle='--', label='Improved GD', linewidth=2)
+plt.plot(X, y_pred_ridge, color='purple', linestyle='-.', label='Ridge Regression', linewidth=2)
+plt.xlabel('X')
+plt.ylabel('y')
+plt.title('Comparison of All Regression Methods')
 plt.legend()
 plt.show()
