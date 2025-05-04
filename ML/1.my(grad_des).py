@@ -32,3 +32,29 @@ plt.ylabel('y')
 plt.title('Synthetic Dataset with Noise and Outliers')
 plt.legend()
 plt.show()
+
+# Reshape X for sklearn
+X_reshaped = X.reshape(-1,1)
+
+# Fit Linear Regression
+lr = LinearRegression()
+lr.fit(X_reshaped,y)
+
+# Predictions
+y_pred = lr.predict(X_reshaped)
+
+# Calculate MSE
+mse = mean_squared_error(y,y_pred)
+print(f"OLS Coefficients: slope={lr.coef_[0]:.2f}, intercept={lr.intercept_:.2f}")
+print(f"Mean Squared Error: {mse:.2f}")
+
+# Plot results
+plt.figure(figsize=(10,6))
+plt.scatter(X,y,label='Data',alpha=0.7)
+plt.plot(X,y_true,color="red",label="True relationship",linewidth=2)
+plt.plot(X,y_pred,color="green",label="OLS prediction",linewidth=2)
+plt.xlabel('X')
+plt.ylabel('y')
+plt.title('Ordinary Least Square Regression')
+plt.legend()
+plt.show()
