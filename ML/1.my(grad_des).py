@@ -102,3 +102,39 @@ plt.ylabel('y')
 plt.title('Comparison of Regression Methods')
 plt.legend()
 plt.show()
+
+# Feature scaling (normalization)
+X_normalized = (X_reshaped - np.mean(X_reshaped)) / np.std(X_reshaped)
+
+# Initialize and fit gradient descent model with normalized features
+gd_lr_improved = GradientDescentLinearRegression(learning_rate=0.1, n_iterations=2000)
+gd_lr_improved.fit(X_normalized, y)
+
+# Get predictions (need to normalize test data the same way)
+y_pred_gd_improved = gd_lr_improved.predict(X_normalized)
+
+# Get parameters (need to adjust for scaling)
+mean_X = np.mean(X_reshaped)
+std_X = np.std(X_reshaped)
+params_improved = gd_lr_improved.get_params()
+adjusted_intercept = params_improved['intercept'] - params_improved['slope'] * mean_X / std_X
+adjusted_slope = params_improved['slope'] / std_X
+
+print(f"Improved Gradient Descent Coefficients: slope={adjusted_slope:.2f}, intercept={adjusted_intercept:.2f}")
+
+# Calculate MSE
+mse_gd_improved = mean_squared_error(y, y_pred_gd_improved)
+print(f"Mean Squared Error (Improved Gradient Descent): {mse_gd_improved:.2f}")
+
+# Plot results comparison
+plt.figure(figsize=(10, 6))
+plt.scatter(X, y, label='Data', alpha=0.7)
+plt.plot(X, y_true, color='red', label='True relationship', linewidth=2)
+plt.plot(X, y_pred, color='green', label='OLS prediction', linewidth=2)
+plt.plot(X, y_pred_gd, color='blue', linestyle='--', label='Basic GD prediction', linewidth=2)
+plt.plot(X, y_pred_gd_improved, color='purple', linestyle='-.', label='Improved GD prediction', linewidth=2)
+plt.xlabel('X')
+plt.ylabel('y')
+plt.title('Comparison of Gradient Descent Implementations')
+plt.legend()
+plt.show()
