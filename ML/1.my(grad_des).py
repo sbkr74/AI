@@ -23,16 +23,6 @@ y = y_true + noise
 outlier_indices = np.random.choice(n_samples, size=15, replace=False)
 y[outlier_indices] += np.random.normal(15, 5, size=15)  # Large noise for outliers
 
-# Plot the data
-plt.figure(figsize=(10, 6))
-plt.scatter(X, y, label='Data with noise and outliers', alpha=0.7)
-plt.plot(X, y_true, color='red', label='True relationship', linewidth=2)
-plt.xlabel('X')
-plt.ylabel('y')
-plt.title('Synthetic Dataset with Noise and Outliers')
-plt.legend()
-plt.show()
-
 # Reshape X for sklearn
 X_reshaped = X.reshape(-1,1)
 
@@ -48,13 +38,67 @@ mse = mean_squared_error(y,y_pred)
 print(f"OLS Coefficients: slope={lr.coef_[0]:.2f}, intercept={lr.intercept_:.2f}")
 print(f"Mean Squared Error: {mse:.2f}")
 
-# Plot results
-plt.figure(figsize=(10,6))
-plt.scatter(X,y,label='Data',alpha=0.7)
-plt.plot(X,y_true,color="red",label="True relationship",linewidth=2)
-plt.plot(X,y_pred,color="green",label="OLS prediction",linewidth=2)
+
+class GradientDescentLinearRegression:
+    def __init__(self, learning_rate=0.01, n_iterations=1000):
+        self.learning_rate = learning_rate
+        self.n_iterations = n_iterations
+        self.theta = None  # Parameters (intercept, slope)
+        self.loss_history = []
+    
+    def fit(self, X, y):
+        # Add bias term (column of 1s)
+        X_b = np.c_[np.ones((len(X), 1)), X]
+        
+        # Initialize parameters
+        self.theta = np.random.randn(2, 1)
+        
+        for iteration in range(self.n_iterations):
+            gradients = 2/len(X) * X_b.T.dot(X_b.dot(self.theta) - y.reshape(-1, 1))
+            self.theta -= self.learning_rate * gradients
+            
+            # Calculate and store loss (MSE)
+            mse = np.mean((X_b.dot(self.theta) - y.reshape(-1, 1))**2)
+            self.loss_history.append(mse)
+    
+    def predict(self, X):
+        X_b = np.c_[np.ones((len(X), 1)), X]
+        return X_b.dot(self.theta)
+    
+    def get_params(self):
+        return {'intercept': self.theta[0][0], 'slope': self.theta[1][0]}
+
+# Initialize and fit gradient descent model
+gd_lr = GradientDescentLinearRegression(learning_rate=0.01, n_iterations=1000)
+gd_lr.fit(X_reshaped, y)
+
+# Get predictions
+y_pred_gd = gd_lr.predict(X_reshaped)
+
+# Get parameters
+params = gd_lr.get_params()
+print(f"Gradient Descent Coefficients: slope={params['slope']:.2f}, intercept={params['intercept']:.2f}")
+
+# Calculate MSE
+mse_gd = mean_squared_error(y, y_pred_gd)
+print(f"Mean Squared Error (Gradient Descent): {mse_gd:.2f}")
+
+# Plot loss convergence
+plt.figure(figsize=(10, 4))
+plt.plot(gd_lr.loss_history)
+plt.xlabel('Iteration')
+plt.ylabel('Mean Squared Error')
+plt.title('Gradient Descent Convergence')
+plt.show()
+
+# Plot results comparison
+plt.figure(figsize=(10, 6))
+plt.scatter(X, y, label='Data', alpha=0.7)
+plt.plot(X, y_true, color='red', label='True relationship', linewidth=2)
+plt.plot(X, y_pred, color='green', label='OLS prediction', linewidth=2)
+plt.plot(X, y_pred_gd, color='blue', linestyle='--', label='Gradient Descent prediction', linewidth=2)
 plt.xlabel('X')
 plt.ylabel('y')
-plt.title('Ordinary Least Square Regression')
+plt.title('Comparison of Regression Methods')
 plt.legend()
 plt.show()
