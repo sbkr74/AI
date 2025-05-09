@@ -8,11 +8,11 @@ from sklearn.metrics import mean_squared_error,r2_score
 np.random.seed(42)
 
 # Generate synthetic data
-n_samples = 200
+n_samples = 20
 X = np.linspace(0, 10, n_samples)
 
 noise = np.random.normal(0, 1.5, n_samples)
-y = X*2.3+noise
+y = X*2.5+noise
 
 
 # 2. Split data into training and test sets
@@ -34,6 +34,11 @@ print("Coefficients:", model.coef_)
 print("Intercept:", model.intercept_)
 print("Mean squared error: %.2f" % mean_squared_error(y_test, y_pred))
 print("Coefficient of determination (R²): %.2f" % r2_score(y_test, y_pred))
+
+# 7. Use the model for new predictions
+new_data = np.array([[21]])
+prediction = model.predict(new_data)
+print("Prediction for input 21:", prediction)
 
 # Plot results
 plt.figure(figsize=(10, 6))
